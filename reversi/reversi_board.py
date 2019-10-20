@@ -1,9 +1,14 @@
 # adapted by Toby Dragon from original source code by Al Sweigart, available with creative commons license: https://inventwithpython.com/#donate
+import json
+
 
 class ReversiBoard:
 
-    def __init__(self, size=8):
-        self._board = _getNewBoard(size)
+    def __init__(self, size=8, board_filename=None):
+        if board_filename is None:
+            self._board = _getNewBoard(size)
+        else:
+            self._board = _board_from_json(board_filename)
 
     def draw_board(self):
         _drawBoard(self._board)
@@ -26,7 +31,18 @@ class ReversiBoard:
     def get_size(self):
         return len(self._board)
 
+    def get_symbol_for_position(self, position):
+        return self._board[position[0]][position[1]]
 
+    def get_opponent_symbol(self, symbol):
+        if symbol == 'X':
+            return 'O'
+        else:
+            return 'X'
+
+    def to_json_file(self, filename):
+        with open(filename, 'w', encoding='utf-8') as f:
+            json.dump(self._board, f, ensure_ascii=False)
 
 
 def _getNewBoard(size):
@@ -143,3 +159,6 @@ def _getScoreOfBoard(board):
                 oscore += 1
     return {'X':xscore, 'O':oscore}
 
+def _board_from_json(board_filename):
+    with open(board_filename) as json_file:
+        return json.load(json_file)
