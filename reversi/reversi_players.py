@@ -207,12 +207,13 @@ class MinimaxPlayer:
             board2 = copy.deepcopy(board)
             board2.make_move(self.symbol, valid_moves[i])
 
-            if(self.in_transposition_table(board2, seen_boards) == True): #if the board state hasn't been seen
+            if(self.in_transposition_table(board2, seen_boards) == True): #already seen board state
                 move_val = seen_boards[board2]
                 max_node[tuple(valid_moves[i])] = move_val
-            else: #already seen board state
+            else: #if the board state hasn't been seen
                 move_val = self.minimax(board2, 3, 1, False, seen_boards)
                 max_node[tuple(valid_moves[i])] = move_val
+                seen_boards[board] = move_val
 
 
         #find the node with the highest max val, return it
@@ -250,6 +251,7 @@ class MinimaxPlayer:
                 else:
                     val = self.minimax(board2, max_depth, current_depth + 1, False, seen_boards)
                     values.add(val)
+                    seen_boards[board] = val
 
             return max(values)
 
@@ -276,6 +278,7 @@ class MinimaxPlayer:
                 else:
                     val = self.minimax(board2, max_depth, current_depth + 1, True, seen_boards)
                     values.add(val)
+                    seen_boards[board] = val
 
             return min(values)
 
@@ -289,14 +292,19 @@ class MinimaxPlayer:
         return scores.get("O")-scores.get("X")
 
     def in_transposition_table(self, board, seen_boards):
-        #take board turn it into json
         #rotate and check all 4 possible perspectives
         #return true if it was already in the transposition table
         #false if it is new
 
-        #will currently check board from one perspective, rotate implementation next
-        if(board in seen_boards):
+        if (board in seen_boards): #actual state
             return True
+
+        for i in range(3): #equivilant states
+            board2 = copy.deepcopy(board)
+            board2.rotate_board()
+            #will currently check board from one perspective, rotate implementation next
+            if(board2 in seen_boards):
+                return True
 
         return False
 
