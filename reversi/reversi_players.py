@@ -136,7 +136,7 @@ class MinimaxPlayerHowGreat:
 
 
 
-MAX_DEPTH=2
+MAX_DEPTH=3
 """
 Minimax recursive function
 @author B Welsh
@@ -188,6 +188,7 @@ def minimax(board, move, max_symbol, is_max=False, depth=0):
 
 
 
+
 """
 Minimax player implementation
 @author Kerry Buckman
@@ -205,7 +206,7 @@ class MinimaxPlayer:
         for i in range(len(valid_moves)):
             board2 = copy.deepcopy(board)
             board2.make_move(self.symbol, valid_moves[i])
-            move_val = self.minimax(board2, 3, 1, False)
+            move_val = self.minimax(board2, MAX_DEPTH, 1, False)
             max_node[tuple(valid_moves[i])] = move_val
 
 
@@ -228,11 +229,11 @@ class MinimaxPlayer:
             if board.game_continues() == False:
                 return self.eval_board(board)
 
-            if len(move_list) == 0:  # end of tree or invalid move
-                return self.minimax(board, max_depth, current_depth+1, False)
-
             if current_depth == max_depth:  # deep as can go
                 return self.eval_board(board)
+
+            if len(move_list) == 0:  # end of tree or invalid move
+                return self.minimax(board, max_depth, current_depth+1, False)
 
             values = set()
             for i in range(len(move_list)):
@@ -250,11 +251,11 @@ class MinimaxPlayer:
             if board.game_continues() == False:
                 return self.eval_board(board)
 
-            if len(move_list) == 0:  # end of tree or invalid move
-                return self.minimax(board, max_depth, current_depth+1, True)
-
             if current_depth == max_depth:    # deep as can go
                 return self.eval_board(board)
+
+            if len(move_list) == 0:  # end of tree or invalid move
+                return self.minimax(board, max_depth, current_depth+1, True)
 
             values = set()
             for i in range(len(move_list)):
@@ -276,3 +277,4 @@ class MinimaxPlayer:
         if self.symbol == "X":
             return scores.get("X")-scores.get("O")
         return scores.get("O")-scores.get("X")
+

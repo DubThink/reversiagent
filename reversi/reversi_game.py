@@ -4,6 +4,7 @@ import copy
 from datetime import datetime
 from reversi.reversi_board import ReversiBoard
 from reversi.reversi_players import *
+from reversi.reversi_players import MinimaxPlayerHowGreat
 
 
 class ReversiGame:
@@ -67,11 +68,12 @@ def compare_players(player1, player2, count=1000):
     game_count_map = {player1.symbol: 0, player2.symbol: 0, "TIE": 0}
     time_elapsed_map = {player1.symbol: 0, player2.symbol: 0}
     for i in range(1, count+1):
-        if i % (count//10) == 0:
-            print(i, "games finished")
+        # if i % (count//10) == 0:
+        #     print(i, "games finished")
         # swap player order for unbiasing
         player1, player2 = player2, player1
         game = ReversiGame(player1, player2, show_status=False)
+        print(game.calc_winner())
         game_count_map[game.calc_winner()] += 1
         decision_times = game.get_decision_times()
         for symbol in decision_times:
@@ -82,7 +84,8 @@ def compare_players(player1, player2, count=1000):
 
 def main():
     # ReversiGame(FantasticPlayerWow("O"),MinimaxPlayerHowGreat("X"))
-    ReversiGame(MinimaxPlayerHowGreat("X"),RandomComputerPlayer("O"),board_size=8)
+    # ReversiGame(MinimaxPlayer("O"),MinimaxPlayerHowGreat("X"))
+    compare_players(MinimaxPlayer("O"),MinimaxPlayer("X"),50)
     # compare_players(RandomComputerPlayer("O"),MinimaxPlayerHowGreat("X"),10)
     # ReversiGame(ReallyGreatPlayer("X"),GreedyComputerPlayer("O"))
     # compare_players(RandomComputerPlayer("X"), FantasticPlayerWow("O"))
