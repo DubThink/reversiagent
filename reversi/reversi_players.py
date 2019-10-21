@@ -199,14 +199,20 @@ class MinimaxPlayer:
     def get_move(self, board):
         valid_moves = board.calc_valid_moves(self.symbol) #all valid moves
         max_node = {} #dictionary of moves to their values
+        seen_boards = {} #transposition table: store board states and the value associated
 
         #for each move, call minimax and get the evaluation
         #store in dictionary max node (key is move, value is value)
         for i in range(len(valid_moves)):
             board2 = copy.deepcopy(board)
             board2.make_move(self.symbol, valid_moves[i])
-            move_val = self.minimax(board2, 3, 1, False)
-            max_node[tuple(valid_moves[i])] = move_val
+
+            if(self.in_transposition_table(board2, seen_boards) == True): #if the board state hasn't been seen
+                move_val = seen_boards[board2]
+                max_node[tuple(valid_moves[i])] = move_val
+            else: #already seen board state
+                move_val = self.minimax(board2, 3, 1, False, seen_boards)
+                max_node[tuple(valid_moves[i])] = move_val
 
 
         #find the node with the highest max val, return it
@@ -220,7 +226,7 @@ class MinimaxPlayer:
 
     # returns value of a node (move)
 
-    def minimax(self, board, max_depth, current_depth, my_turn):
+    def minimax(self, board, max_depth, current_depth, my_turn, seen_boards):
 
         if my_turn == True:
             move_list = board.calc_valid_moves(self.symbol)
@@ -229,7 +235,7 @@ class MinimaxPlayer:
                 return self.eval_board(board)
 
             if len(move_list) == 0:  # end of tree or invalid move
-                return self.minimax(board, max_depth, current_depth+1, False)
+                return self.minimax(board, max_depth, current_depth+1, False, seen_boards)
 
             if current_depth == max_depth:  # deep as can go
                 return self.eval_board(board)
@@ -238,8 +244,12 @@ class MinimaxPlayer:
             for i in range(len(move_list)):
                 board2 = copy.deepcopy(board)
                 board2.make_move(self.symbol, move_list[i])
-                val = self.minimax(board2, max_depth, current_depth + 1, False)
-                values.add(val)
+
+                if(self.in_transposition_table(board2, seen_boards) == True):
+                    values.add(seen_boards[board2])
+                else:
+                    val = self.minimax(board2, max_depth, current_depth + 1, False, seen_boards)
+                    values.add(val)
 
             return max(values)
 
@@ -251,7 +261,7 @@ class MinimaxPlayer:
                 return self.eval_board(board)
 
             if len(move_list) == 0:  # end of tree or invalid move
-                return self.minimax(board, max_depth, current_depth+1, True)
+                return self.minimax(board, max_depth, current_depth+1, True, seen_boards)
 
             if current_depth == max_depth:    # deep as can go
                 return self.eval_board(board)
@@ -260,13 +270,14 @@ class MinimaxPlayer:
             for i in range(len(move_list)):
                 board2 = copy.deepcopy(board)
                 board2.make_move(board2.get_opponent_symbol(self.symbol), move_list[i])
-                val = self.minimax(board2, max_depth, current_depth + 1, True)
-                values.add(val)
+
+                if (self.in_transposition_table(board2, seen_boards) == True):
+                    values.add(seen_boards[board2])
+                else:
+                    val = self.minimax(board2, max_depth, current_depth + 1, True, seen_boards)
+                    values.add(val)
 
             return min(values)
-
-
-
 
 
 
@@ -276,3 +287,16 @@ class MinimaxPlayer:
         if self.symbol == "X":
             return scores.get("X")-scores.get("O")
         return scores.get("O")-scores.get("X")
+
+    def in_transposition_table(self, board, seen_boards):
+        #take board turn it into json
+        #rotate and check all 4 possible perspectives
+        #return true if it was already in the transposition table
+        #false if it is new
+
+        #will currently check board from one perspective, rotate implementation next
+        if(board in seen_boards):
+            return True
+
+        return False
+

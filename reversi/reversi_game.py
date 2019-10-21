@@ -82,7 +82,7 @@ def compare_players(player1, player2, count=1000):
 
 def main():
     # ReversiGame(FantasticPlayerWow("O"),MinimaxPlayerHowGreat("X"))
-    ReversiGame(MinimaxPlayerHowGreat("X"),RandomComputerPlayer("O"),board_size=8)
+    ReversiGame(MinimaxPlayer("X"), RandomComputerPlayer("O"), board_size=8)
     # compare_players(RandomComputerPlayer("O"),MinimaxPlayerHowGreat("X"),10)
     # ReversiGame(ReallyGreatPlayer("X"),GreedyComputerPlayer("O"))
     # compare_players(RandomComputerPlayer("X"), FantasticPlayerWow("O"))
