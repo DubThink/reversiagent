@@ -63,12 +63,12 @@ def print_scores(score_map):
     print()
 
 
-def compare_players(player1, player2, count=1000):
+def compare_players(player1, player2, count=1):
     game_count_map = {player1.symbol: 0, player2.symbol: 0, "TIE": 0}
     time_elapsed_map = {player1.symbol: 0, player2.symbol: 0}
     for i in range(1, count+1):
-        if i % (count//10) == 0:
-            print(i, "games finished")
+        #if i % (count//10) == 0:
+         #   print(i, "games finished")
         # swap player order for unbiasing
         player1, player2 = player2, player1
         game = ReversiGame(player1, player2, show_status=False)
@@ -82,11 +82,12 @@ def compare_players(player1, player2, count=1000):
 
 def main():
     # ReversiGame(FantasticPlayerWow("O"),MinimaxPlayerHowGreat("X"))
-    ReversiGame(MinimaxPlayerHowGreat("X"),RandomComputerPlayer("O"),board_size=8)
+    #ReversiGame(MinimaxPlayer("X"),RandomComputerPlayer("O"),board_size=4)
     # compare_players(RandomComputerPlayer("O"),MinimaxPlayerHowGreat("X"),10)
     # ReversiGame(ReallyGreatPlayer("X"),GreedyComputerPlayer("O"))
     # compare_players(RandomComputerPlayer("X"), FantasticPlayerWow("O"))
     # compare_players(RandomComputerPlayer("X"), FantasticPlayerWow("O"))
+    compare_players(MinimaxPlayer("X"),RandomComputerPlayer("O"))
 
 
 if __name__ == "__main__":
