@@ -1,6 +1,7 @@
 # adapted by Toby Dragon from original source code by Al Sweigart, available with creative commons license: https://inventwithpython.com/#donate
 import random
 import copy
+import heapq
 
 
 class HumanPlayer:
@@ -240,9 +241,11 @@ class MinimaxPlayer:
                 return self.minimax(board, max_depth, current_depth + 1, False, ab_val)
 
             values = set()
-            for i in range(len(move_list)):
+            #beam_search_moves=self.beam_search(board,2,move_list)
+            beam_search_moves=move_list
+            for i in range(len(beam_search_moves)):
                 board2 = copy.deepcopy(board)
-                board2.make_move(self.symbol, move_list[i])
+                board2.make_move(self.symbol, beam_search_moves[i])
                 val = self.minimax(board2, max_depth, current_depth + 1, False, ab_val)
                 # AB pruning
                 # if one of our children is less than our parent's AB, then we'll pick it or worse,
@@ -270,9 +273,11 @@ class MinimaxPlayer:
                 return self.minimax(board, max_depth, current_depth + 1, True, ab_val)
 
             values = set()
-            for i in range(len(move_list)):
+            # beam_search_moves = self.beam_search(board, 2, move_list)
+            beam_search_moves=move_list
+            for i in range(len(beam_search_moves)):
                 board2 = copy.deepcopy(board)
-                board2.make_move(board2.get_opponent_symbol(self.symbol), move_list[i])
+                board2.make_move(board2.get_opponent_symbol(self.symbol), beam_search_moves[i])
                 val = self.minimax(board2, max_depth, current_depth + 1, True, ab_val)
                 # AB pruning
                 # if one of our children is less than our parent's AB, then we'll pick it or worse,
@@ -285,7 +290,28 @@ class MinimaxPlayer:
 
             return min(values)
 
-    # returns how many more pieces player 1 has than player 2
+
+    def beam_search(self,board,n,possible_moves):
+        if n>=len(possible_moves):
+            return possible_moves
+        else:
+            moves_values_queue = []
+            for move in possible_moves:
+                board2 = copy.deepcopy(board)
+                board2.make_move(self.symbol, move)
+                value = self.eval_board(board)
+                heapq.heappush(moves_values_queue, (value, move))
+            best_moves = heapq.nlargest(n, moves_values_queue)
+            best_moves_list = []
+            for i in range(len(best_moves)):
+                best_moves_list.append(best_moves[i][1])
+            return best_moves_list
+
+
+
+
+
+    #returns how many more pieces player 1 has than player 2
     def eval_board(self, board):
         scores = board.calc_scores()
         if self.symbol == "X":
