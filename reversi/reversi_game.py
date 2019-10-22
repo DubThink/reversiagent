@@ -2,9 +2,11 @@
 
 import copy
 from datetime import datetime
+
+from reversi.player3.all_players import *
 from reversi.reversi_board import ReversiBoard
-from reversi.reversi_players import *
-from reversi.reversi_players import MinimaxPlayerHowGreat
+from reversi.reversi_players import RandomComputerPlayer
+from reversi.reversi_players import HumanPlayer
 
 
 class ReversiGame:
@@ -94,7 +96,7 @@ def main():
     # ReversiGame(ReallyGreatPlayer("X"),GreedyComputerPlayer("O"))
     # compare_players(RandomComputerPlayer("X"), FantasticPlayerWow("O"))
     # compare_players(RandomComputerPlayer("X"), FantasticPlayerWow("O"))
-    compare_players(MinimaxPlayer("X"),RandomComputerPlayer("O"))
+    compare_players(get_player_c("X"),RandomComputerPlayer("O"),10)
 
 
 if __name__ == "__main__":

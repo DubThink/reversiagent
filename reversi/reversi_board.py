@@ -44,8 +44,6 @@ class ReversiBoard:
         with open(filename, 'w', encoding='utf-8') as f:
             json.dump(self._board, f, ensure_ascii=False)
 
-    def rotate_board(self):
-        return rotate(self)
 
 
 def _getNewBoard(size):
@@ -165,13 +163,3 @@ def _getScoreOfBoard(board):
 def _board_from_json(board_filename):
     with open(board_filename) as json_file:
         return json.load(json_file)
-
-def rotate(board):
-    new_board = []
-    row = []
-    for i in range(len(board._board)):
-        for j in range(len(board._board)):
-            row.insert(0, board._board[j][i])
-    new_board.append(row)
-
-    board._board = new_board
