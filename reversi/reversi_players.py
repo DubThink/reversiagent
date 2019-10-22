@@ -281,7 +281,7 @@ class MinimaxPlayer:
                 return self.eval_board(board)
 
             if len(move_list) == 0:  # end of tree or invalid move
-                return self.minimax(board, max_depth, current_depth + 1, True, ab_val)
+                return self.minimax(board, max_depth, current_depth + 1, True, seen_boards, ab_val)
 
             values = set()
             # beam_search_moves = self.beam_search(board, 2, move_list)
