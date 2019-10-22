@@ -73,7 +73,7 @@ def compare_players(player1, player2, count=1000):
         # swap player order for unbiasing
         player1, player2 = player2, player1
         game = ReversiGame(player1, player2, show_status=False)
-        print(game.calc_winner())
+        # print(game.calc_winner())
         game_count_map[game.calc_winner()] += 1
         decision_times = game.get_decision_times()
         for symbol in decision_times:
@@ -85,7 +85,9 @@ def compare_players(player1, player2, count=1000):
 def main():
     # ReversiGame(FantasticPlayerWow("O"),MinimaxPlayerHowGreat("X"))
     # ReversiGame(MinimaxPlayer("O"),MinimaxPlayerHowGreat("X"))
-    compare_players(MinimaxPlayer("O"),MinimaxPlayer("X"),50)
+    for i in range(4,30):
+        print("At depth %d:"%i)
+        compare_players(MinimaxPlayerAB("O",i),MinimaxPlayer("X"),2)
     # compare_players(RandomComputerPlayer("O"),MinimaxPlayerHowGreat("X"),10)
     # ReversiGame(ReallyGreatPlayer("X"),GreedyComputerPlayer("O"))
     # compare_players(RandomComputerPlayer("X"), FantasticPlayerWow("O"))
