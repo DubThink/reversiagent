@@ -202,18 +202,26 @@ class MinimaxPlayer:
         self.ab_pruning=ab_pruning
 
     def get_move(self, board):
-        valid_moves = board.calc_valid_moves(self.symbol)  # all valid moves
-        max_node = {}  # dictionary of moves to their values
+        valid_moves = board.calc_valid_moves(self.symbol) #all valid moves
+        max_node = {} #dictionary of moves to their values
+        seen_boards = {} #transposition table: store board states and the value associated
         ab_val = 10000
-        # for each move, call minimax and get the evaluation
-        # store in dictionary max node (key is move, value is value)
+
+        #for each move, call minimax and get the evaluation
+        #store in dictionary max node (key is move, value is value)
         for i in range(len(valid_moves)):
             board2 = copy.deepcopy(board)
             board2.make_move(self.symbol, valid_moves[i])
-            move_val = self.minimax(board2, self.max_depth, 1, False,ab_val)
-            ab_val=max(ab_val,move_val)
-            max_node[tuple(valid_moves[i])] = move_val
 
+            if(self.in_transposition_table(board2, seen_boards) == True): #already seen board state
+                move_val = seen_boards[board2]
+                ab_val = max(ab_val, move_val)
+                max_node[tuple(valid_moves[i])] = move_val
+            else: #if the board state hasn't been seen
+                move_val = self.minimax(board2, self.max_depth, 1, False, seen_boards, ab_val)
+                ab_val = max(ab_val, move_val)
+                max_node[tuple(valid_moves[i])] = move_val
+                seen_boards[board] = move_val
         # find the node with the highest max val, return it
         max_val = max_node.get(tuple(valid_moves[0]))
         max_val_key = tuple(valid_moves[0])  # the key that matches with the highest value
@@ -225,8 +233,8 @@ class MinimaxPlayer:
 
     # returns value of a node (move)
 
-    def minimax(self, board, max_depth, current_depth, my_turn, parent_ab_val):
 
+    def minimax(self, board, max_depth, current_depth, my_turn, seen_boards, parent_ab_val):
         if my_turn:
             move_list = board.calc_valid_moves(self.symbol)
             ab_val = 10000
@@ -238,7 +246,7 @@ class MinimaxPlayer:
                 return self.eval_board(board)
 
             if len(move_list) == 0:  # end of tree or invalid move
-                return self.minimax(board, max_depth, current_depth + 1, False, ab_val)
+                return self.minimax(board, max_depth, current_depth + 1, False, seen_boards, ab_val)
 
             values = set()
             #beam_search_moves=self.beam_search(board,2,move_list)
@@ -246,7 +254,10 @@ class MinimaxPlayer:
             for i in range(len(beam_search_moves)):
                 board2 = copy.deepcopy(board)
                 board2.make_move(self.symbol, beam_search_moves[i])
-                val = self.minimax(board2, max_depth, current_depth + 1, False, ab_val)
+                if(self.in_transposition_table(board2, seen_boards) == True):
+                    val = seen_boards[board2]
+                else:
+                    val = self.minimax(board2, max_depth, current_depth + 1, False, seen_boards, ab_val)
                 # AB pruning
                 # if one of our children is less than our parent's AB, then we'll pick it or worse,
                 # and our parent node doesn't care about us
@@ -255,7 +266,7 @@ class MinimaxPlayer:
                     return val
                 ab_val = max(ab_val, val)
                 values.add(val)
-
+                seen_boards[board] = val
             return max(values)
 
 
@@ -277,8 +288,21 @@ class MinimaxPlayer:
             beam_search_moves=move_list
             for i in range(len(beam_search_moves)):
                 board2 = copy.deepcopy(board)
+                board2.make_move(board2.get_opponent_symbol(self.symbol), move_list[i])
+
+                if (self.in_transposition_table(board2, seen_boards) == True):
+                    val = seen_boards[board2]
+                else:
+                    val = self.minimax(board2, max_depth, current_depth + 1, True, seen_boards, ab_val)
+                    values.add(val)
+                    seen_boards[board] = val
                 board2.make_move(board2.get_opponent_symbol(self.symbol), beam_search_moves[i])
-                val = self.minimax(board2, max_depth, current_depth + 1, True, ab_val)
+                if (self.in_transposition_table(board2, seen_boards) == True):
+                    val = seen_boards[board2]
+                else:
+                    val = self.minimax(board2, max_depth, current_depth + 1, True, seen_boards, ab_val)
+                    values.add(val)
+                    seen_boards[board] = val
                 # AB pruning
                 # if one of our children is less than our parent's AB, then we'll pick it or worse,
                 # and our parent node doesn't care about us
@@ -287,6 +311,7 @@ class MinimaxPlayer:
                     return val
                 ab_val = min(ab_val, val)
                 values.add(val)
+                seen_boards[board] = val
 
             return min(values)
 
@@ -309,11 +334,26 @@ class MinimaxPlayer:
 
 
 
-
-
     #returns how many more pieces player 1 has than player 2
     def eval_board(self, board):
         scores = board.calc_scores()
         if self.symbol == "X":
-            return scores.get("X") - scores.get("O")
-        return scores.get("O") - scores.get("X")
+            return scores.get("X")-scores.get("O")
+        return scores.get("O")-scores.get("X")
+
+    def in_transposition_table(self, board, seen_boards):
+        #rotate and check all 4 possible perspectives
+        #return true if it was already in the transposition table
+        #false if it is new
+
+        if (board in seen_boards): #actual state
+            return True
+
+        for i in range(3): #equivilant states
+            board2 = copy.deepcopy(board)
+            board2.rotate_board()
+            #will currently check board from one perspective, rotate implementation next
+            if(board2 in seen_boards):
+                return True
+
+        return False
