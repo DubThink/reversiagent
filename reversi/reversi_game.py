@@ -8,6 +8,7 @@ from reversi.reversi_board import ReversiBoard
 from reversi.reversi_players import RandomComputerPlayer
 from reversi.reversi_players import HumanPlayer
 
+MAX_TIME=.5
 
 class ReversiGame:
 
@@ -31,10 +32,16 @@ class ReversiGame:
     def play_round(self):
         start = datetime.now()
         self.play_move(self.player1)
-        self.decision_times[self.player1.symbol] += (datetime.now()-start).total_seconds()
+        dt=(datetime.now()-start).total_seconds()
+        if dt>MAX_TIME:
+            print(self.player1.symbol,"took",dt,"seconds.")
+        self.decision_times[self.player1.symbol] +=dt
         start = datetime.now()
         self.play_move(self.player2)
-        self.decision_times[self.player2.symbol] += (datetime.now()-start).total_seconds()
+        dt = (datetime.now() - start).total_seconds()
+        if dt > MAX_TIME:
+            print(self.player2.symbol, "took", dt, "seconds.")
+        self.decision_times[self.player2.symbol] += dt
 
     def play_move(self, player):
         if self.board.calc_valid_moves(player.symbol):
@@ -75,7 +82,7 @@ def compare_players(player1, player2, count=1):
         # swap player order for unbiasing
         player1, player2 = player2, player1
         game = ReversiGame(player1, player2, show_status=False)
-        # print(game.calc_winner())
+        print(game.calc_winner())
         game_count_map[game.calc_winner()] += 1
         decision_times = game.get_decision_times()
         for symbol in decision_times:
@@ -96,7 +103,7 @@ def main():
     # ReversiGame(ReallyGreatPlayer("X"),GreedyComputerPlayer("O"))
     # compare_players(RandomComputerPlayer("X"), FantasticPlayerWow("O"))
     # compare_players(RandomComputerPlayer("X"), FantasticPlayerWow("O"))
-    compare_players(get_player_c("X"),RandomComputerPlayer("O"),10)
+    compare_players(get_combined_player("X"),get_player_b("O"),2)
 
 
 if __name__ == "__main__":

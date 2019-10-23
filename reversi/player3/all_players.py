@@ -228,4 +228,4 @@ def get_combined_player(symbol):
     """
     :returns: the best combination of the minimax enhancements that your team can create
     """
-    return MinimaxPlayerG3(symbol)
+    return MinimaxPlayerG3(symbol,beam_search_enabled=False)
