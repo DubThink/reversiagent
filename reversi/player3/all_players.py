@@ -64,13 +64,14 @@ class MinimaxPlayerG3:
             if len(move_list) == 0:  # end of tree or invalid move
                 return self.minimax(board, max_depth, current_depth + 1, False, seen_boards, ab_val)
 
-            values = set()
             if self.beam_search_enabled:
                 beam_search_moves=self.beam_search(board,2,move_list)
             elif self.move_ordering_enabled:
                 beam_search_moves=self.beam_search(board,len(move_list),move_list)
             else:
                 beam_search_moves=move_list
+            # preallocate the list for speed
+            values = [None]*len(beam_search_moves)
             for i in range(len(beam_search_moves)):
                 board2 = copy.deepcopy(board)
                 board2.make_move(self.symbol, beam_search_moves[i])
@@ -85,7 +86,7 @@ class MinimaxPlayerG3:
                 if val > parent_ab_val and self.ab_pruning:
                     return val
                 ab_val = max(ab_val, val)
-                values.add(val)
+                values[i]=val
                 seen_boards[board] = val
             return max(values)
 
@@ -103,13 +104,15 @@ class MinimaxPlayerG3:
             if len(move_list) == 0:  # end of tree or invalid move
                 return self.minimax(board, max_depth, current_depth + 1, True, seen_boards, ab_val)
 
-            values = set()
             if self.beam_search_enabled:
                 beam_search_moves=self.beam_search(board,2,move_list)
             elif self.move_ordering_enabled:
                 beam_search_moves=self.beam_search(board,len(move_list),move_list)
             else:
                 beam_search_moves=move_list
+
+            # preallocate the list for speed
+            values = [None] * len(beam_search_moves)
             for i in range(len(beam_search_moves)):
                 board2 = copy.deepcopy(board)
                 board2.make_move(board2.get_opponent_symbol(self.symbol), move_list[i])
@@ -126,7 +129,7 @@ class MinimaxPlayerG3:
                 if val < parent_ab_val and self.ab_pruning:
                     return val
                 ab_val = min(ab_val, val)
-                values.add(val)
+                values[i] = val
                 seen_boards[board] = val
 
             return min(values)
