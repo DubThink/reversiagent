@@ -8,7 +8,7 @@ from reversi.reversi_board import ReversiBoard
 from reversi.reversi_players import RandomComputerPlayer
 from reversi.reversi_players import HumanPlayer
 
-MAX_TIME=.5
+MAX_TIME=2.5
 
 class ReversiGame:
 

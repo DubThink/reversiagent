@@ -19,10 +19,11 @@ class MinimaxPlayerG3:
         self.move_ordering_enabled=move_ordering_enabled
 
     def get_move(self, board):
+        # print('-'*10)
         valid_moves = board.calc_valid_moves(self.symbol) #all valid moves
         max_node = {} #dictionary of moves to their values
         seen_boards = {} #transposition table: store board states and the value associated
-        ab_val = 10000
+        ab_val = -10000
 
         #for each move, call minimax and get the evaluation
         #store in dictionary max node (key is move, value is value)
@@ -53,9 +54,10 @@ class MinimaxPlayerG3:
 
 
     def minimax(self, board, max_depth, current_depth, my_turn, seen_boards, parent_ab_val):
+        # print(' '*current_depth+"*")
         if my_turn:
             move_list = board.calc_valid_moves(self.symbol)
-            ab_val = 10000
+            ab_val = -10000
 
             if not board.game_continues():
                 return self.eval_board(board)
@@ -67,9 +69,9 @@ class MinimaxPlayerG3:
                 return self.minimax(board, max_depth, current_depth + 1, False, seen_boards, ab_val)
 
             if self.beam_search_enabled:
-                beam_search_moves=self.beam_search(board,2,move_list)
-            elif self.,move_ordering_enabled:
-                beam_search_moves=self.beam_search(board,len(move_list),move_list)
+                beam_search_moves=self.beam_search(board,5,move_list,self.symbol)
+            elif self.move_ordering_enabled:
+                beam_search_moves=self.beam_search(board,len(move_list),move_list,self.symbol)
             else:
                 beam_search_moves=move_list
             # preallocate the list for speed
@@ -86,6 +88,7 @@ class MinimaxPlayerG3:
                 # and our parent node doesn't care about us
                 # my we're a dysfunctional family
                 if val > parent_ab_val and self.ab_pruning:
+                    # print("pruned")
                     return val
                 ab_val = max(ab_val, val)
                 values[i]=val
@@ -96,7 +99,7 @@ class MinimaxPlayerG3:
 
         else:
             move_list = board.calc_valid_moves(board.get_opponent_symbol(self.symbol))
-            ab_val = -10000
+            ab_val = 10000
 
             if not board.game_continues():
                 return self.eval_board(board)
@@ -108,9 +111,9 @@ class MinimaxPlayerG3:
                 return self.minimax(board, max_depth, current_depth + 1, True, seen_boards, ab_val)
 
             if self.beam_search_enabled:
-                beam_search_moves=self.beam_search(board,2,move_list)
+                beam_search_moves=self.beam_search(board,2,move_list,board.get_opponent_symbol(self.symbol))
             elif self.move_ordering_enabled:
-                beam_search_moves=self.beam_search(board,len(move_list),move_list)
+                beam_search_moves=self.beam_search(board,len(move_list),move_list,board.get_opponent_symbol(self.symbol))
             else:
                 beam_search_moves=move_list
 
@@ -130,6 +133,7 @@ class MinimaxPlayerG3:
                 # and our parent node doesn't care about us
                 # my we're a dysfunctional family
                 if val < parent_ab_val and self.ab_pruning:
+                    # print("pruned")
                     return val
                 ab_val = min(ab_val, val)
                 values[i] = val
@@ -139,13 +143,13 @@ class MinimaxPlayerG3:
             return min(values)
 
 
-    def beam_search(self,board,n,possible_moves):
+    def beam_search(self,board,n,possible_moves,symbol):
         if n>=len(possible_moves):
             return possible_moves
         else:
             moves_values_queue = []
             for move in possible_moves:
-                value=len(board.is_valid_move(self.symbol, move))
+                value=len(board.is_valid_move(symbol, move))
                 heapq.heappush(moves_values_queue, (value, move))
             best_moves = heapq.nlargest(n, moves_values_queue)
             best_moves_list = []
@@ -239,4 +243,4 @@ def get_combined_player(symbol):
     """
     :returns: the best combination of the minimax enhancements that your team can create
     """
-    return MinimaxPlayerG3(symbol,beam_search_enabled=False,transposition_table=False,max_depth=60)
+    return MinimaxPlayerG3(symbol,beam_search_enabled=True,transposition_table=False,move_ordering_enabled=True,max_depth=6)
