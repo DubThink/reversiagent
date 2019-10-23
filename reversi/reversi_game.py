@@ -103,7 +103,7 @@ def main():
     # ReversiGame(ReallyGreatPlayer("X"),GreedyComputerPlayer("O"))
     # compare_players(RandomComputerPlayer("X"), FantasticPlayerWow("O"))
     # compare_players(RandomComputerPlayer("X"), FantasticPlayerWow("O"))
-    compare_players(get_combined_player("X"),get_player_b("O"),2)
+    compare_players(get_combined_player("X"),RandomComputerPlayer("O"),100)
 
 
 if __name__ == "__main__":

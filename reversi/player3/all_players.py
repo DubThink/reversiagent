@@ -9,7 +9,7 @@ Minimax player implementation
 
 
 class MinimaxPlayerG3:
-    def __init__(self, symbol, max_depth=22, ab_pruning=True, transposition_table=True,beam_search_enabled=True):
+    def __init__(self, symbol, max_depth=22, ab_pruning=True, transposition_table=False,beam_search_enabled=True):
         self.symbol = symbol
         self.max_depth=max_depth
         self.ab_pruning=ab_pruning
@@ -36,7 +36,8 @@ class MinimaxPlayerG3:
                 move_val = self.minimax(board2, self.max_depth, 1, False, seen_boards, ab_val)
                 ab_val = max(ab_val, move_val)
                 max_node[tuple(valid_moves[i])] = move_val
-                seen_boards[board] = move_val
+                if self.transposition_table:
+                    seen_boards[board] = move_val
         # find the node with the highest max val, return it
         max_val = max_node.get(tuple(valid_moves[0]))
         max_val_key = tuple(valid_moves[0])  # the key that matches with the highest value
@@ -84,7 +85,8 @@ class MinimaxPlayerG3:
                     return val
                 ab_val = max(ab_val, val)
                 values[i]=val
-                seen_boards[board] = val
+                if self.transposition_table:
+                    seen_boards[board] = val
             return max(values)
 
 
@@ -125,7 +127,8 @@ class MinimaxPlayerG3:
                     return val
                 ab_val = min(ab_val, val)
                 values[i] = val
-                seen_boards[board] = val
+                if self.transposition_table:
+                    seen_boards[board] = val
 
             return min(values)
 
@@ -170,7 +173,8 @@ class MinimaxPlayerG3:
         #return true if it was already in the transposition table
         #false if it is new
 
-        if (board in seen_boards): #actual state
+        if board in seen_boards: #actual state
+            print("WOWOWOWOW")
             return True
 
         board2 = copy.deepcopy(board)
@@ -178,6 +182,7 @@ class MinimaxPlayerG3:
             self.rotate(board2)
             #will currently check board from one perspective, rotate implementation next
             if board2 in seen_boards:
+                print("WLWWOWOWOWL")
                 return True
 
         return False
@@ -231,4 +236,4 @@ def get_combined_player(symbol):
     """
     :returns: the best combination of the minimax enhancements that your team can create
     """
-    return MinimaxPlayerG3(symbol,beam_search_enabled=False)
+    return MinimaxPlayerG3(symbol,beam_search_enabled=False,transposition_table=False,max_depth=60)
