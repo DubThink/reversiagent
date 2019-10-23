@@ -9,12 +9,13 @@ Minimax player implementation
 
 
 class MinimaxPlayerG3:
-    def __init__(self, symbol, max_depth=22, ab_pruning=True, transposition_table=True,beam_search_enabled=True):
+    def __init__(self, symbol, max_depth=22, ab_pruning=True, transposition_table=True,beam_search_enabled=True,move_ordering_enabled=True):
         self.symbol = symbol
         self.max_depth=max_depth
         self.ab_pruning=ab_pruning
         self.transposition_table=transposition_table
         self.beam_search_enabled=beam_search_enabled
+        self.move_ordering_enabled=move_ordering_enabled
 
     def get_move(self, board):
         valid_moves = board.calc_valid_moves(self.symbol) #all valid moves
@@ -66,6 +67,8 @@ class MinimaxPlayerG3:
             values = set()
             if self.beam_search_enabled:
                 beam_search_moves=self.beam_search(board,2,move_list)
+            elif self.move_ordering_enabled:
+                beam_search_moves=self.beam_search(board,len(move_list),move_list)
             else:
                 beam_search_moves=move_list
             for i in range(len(beam_search_moves)):
@@ -103,6 +106,8 @@ class MinimaxPlayerG3:
             values = set()
             if self.beam_search_enabled:
                 beam_search_moves=self.beam_search(board,2,move_list)
+            elif self.move_ordering_enabled:
+                beam_search_moves=self.beam_search(board,len(move_list),move_list)
             else:
                 beam_search_moves=move_list
             for i in range(len(beam_search_moves)):
@@ -133,9 +138,7 @@ class MinimaxPlayerG3:
         else:
             moves_values_queue = []
             for move in possible_moves:
-                board2 = copy.deepcopy(board)
-                board2.make_move(self.symbol, move)
-                value = self.eval_board(board2)
+                value=len(board.is_valid_move(self.symbol, move))
                 heapq.heappush(moves_values_queue, (value, move))
             best_moves = heapq.nlargest(n, moves_values_queue)
             best_moves_list = []
@@ -183,7 +186,7 @@ def get_default_player(symbol):
     """
     :returns: a default minimax player that can operate successfully on a given 8x8 board
     """
-    return MinimaxPlayerG3(symbol, ab_pruning=False, transposition_table=False, beam_search_enabled=False, max_depth=3)
+    return MinimaxPlayerG3(symbol, ab_pruning=False, transposition_table=False, beam_search_enabled=False,move_ordering_enabled=False, max_depth=3)
 
 
 def get_player_a(symbol):
@@ -216,12 +219,11 @@ def get_player_c(symbol):
 
 def get_player_d(symbol):
     """
-    Duplicate since we have 3 people
     :author: Molly Noel
-    :enchancement:
+    :enchancement:alpha beta pruning with move ordering
     :returns: an enhanced minimax player that can operate successfully on a given 8x8 board
     """
-    return MinimaxPlayerG3(symbol, ab_pruning=False, transposition_table=False, beam_search_enabled=True,max_depth=4)
+    return MinimaxPlayerG3(symbol, ab_pruning=True, transposition_table=False, beam_search_enabled=False,move_ordering_enabled=True,max_depth=4)
 
 
 def get_combined_player(symbol):
