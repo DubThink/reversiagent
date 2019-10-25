@@ -144,7 +144,7 @@ class MinimaxPlayerG3:
 
 
     def beam_search(self,board,n,possible_moves,symbol):
-        if n>=len(possible_moves):
+        if n>len(possible_moves):
             return possible_moves
         else:
             moves_values_queue = []
@@ -217,7 +217,7 @@ def get_player_b(symbol):
     :enchancement: Alpha Beta pruning
     :returns: an enhanced minimax player that can operate successfully on a given 8x8 board
     """
-    return MinimaxPlayerG3(symbol, ab_pruning=True, transposition_table=False, beam_search_enabled=False)
+    return MinimaxPlayerG3(symbol, ab_pruning=True, transposition_table=False, beam_search_enabled=False,move_ordering_enabled=False,max_depth=3)
 
 
 def get_player_c(symbol):
