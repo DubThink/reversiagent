@@ -10,19 +10,19 @@ Minimax player implementation
 
 class MinimaxPlayerG3:
 
-    def __init__(self, symbol, max_depth=22, ab_pruning=True, transposition_table=True,beam_search_enabled=True,move_ordering_enabled=True):
+    def __init__(self, symbol, max_depth=3, ab_pruning=True, transposition_table=True,beam_search_enabled=True,move_ordering_enabled=True):
         self.symbol = symbol
         self.max_depth=max_depth
         self.ab_pruning=ab_pruning
         self.transposition_table=transposition_table
         self.beam_search_enabled=beam_search_enabled
         self.move_ordering_enabled=move_ordering_enabled
+        self.seen_boards = {}
 
     def get_move(self, board):
         # print('-'*10)
         valid_moves = board.calc_valid_moves(self.symbol) #all valid moves
         max_node = {} #dictionary of moves to their values
-        seen_boards = {} #transposition table: store board states and the value associated
         ab_val = -10000
 
         #for each move, call minimax and get the evaluation
@@ -31,16 +31,16 @@ class MinimaxPlayerG3:
             board2 = copy.deepcopy(board)
             board2.make_move(self.symbol, valid_moves[i])
 
-            if self.transposition_table and self.in_transposition_table(board2, seen_boards): #already seen board state
-                move_val = seen_boards[board2]
+            if self.transposition_table and self.in_transposition_table(board2)  is not None: #already seen board state
+                move_val = self.seen_boards[tuple(map(tuple, board2._board))]
                 ab_val = max(ab_val, move_val)
                 max_node[tuple(valid_moves[i])] = move_val
             else: #if the board state hasn't been seen
-                move_val = self.minimax(board2, self.max_depth, 1, False, seen_boards, ab_val)
+                move_val = self.minimax(board2, self.max_depth, 1, False, ab_val)
                 ab_val = max(ab_val, move_val)
                 max_node[tuple(valid_moves[i])] = move_val
                 if self.transposition_table:
-                    seen_boards[board] = move_val
+                    self.seen_boards[tuple(map(tuple, board._board))] = move_val
         # find the node with the highest max val, return it
         max_val = max_node.get(tuple(valid_moves[0]))
         max_val_key = tuple(valid_moves[0])  # the key that matches with the highest value
@@ -53,7 +53,7 @@ class MinimaxPlayerG3:
     # returns value of a node (move)
 
 
-    def minimax(self, board, max_depth, current_depth, my_turn, seen_boards, parent_ab_val):
+    def minimax(self, board, max_depth, current_depth, my_turn, parent_ab_val):
         # print(' '*current_depth+"*")
         if my_turn:
             move_list = board.calc_valid_moves(self.symbol)
@@ -66,7 +66,7 @@ class MinimaxPlayerG3:
                 return self.eval_board(board)
 
             if len(move_list) == 0:  # end of tree or invalid move
-                return self.minimax(board, max_depth, current_depth + 1, False, seen_boards, ab_val)
+                return self.minimax(board, max_depth, current_depth + 1, False, ab_val)
 
             if self.beam_search_enabled:
                 beam_search_moves=self.beam_search(board,5,move_list,self.symbol)
@@ -79,10 +79,10 @@ class MinimaxPlayerG3:
             for i in range(len(beam_search_moves)):
                 board2 = copy.deepcopy(board)
                 board2.make_move(self.symbol, beam_search_moves[i])
-                if self.transposition_table and self.in_transposition_table(board2, seen_boards):
-                    val = seen_boards[board2]
+                if self.transposition_table and self.in_transposition_table(board2) is not None:
+                    val = self.seen_boards[tuple(map(tuple, board2._board))]
                 else:
-                    val = self.minimax(board2, max_depth, current_depth + 1, False, seen_boards, ab_val)
+                    val = self.minimax(board2, max_depth, current_depth + 1, False, ab_val)
                 # AB pruning
                 # if one of our children is less than our parent's AB, then we'll pick it or worse,
                 # and our parent node doesn't care about us
@@ -93,7 +93,7 @@ class MinimaxPlayerG3:
                 ab_val = max(ab_val, val)
                 values[i]=val
                 if self.transposition_table:
-                    seen_boards[board] = val
+                    self.seen_boards[tuple(map(tuple, board._board))] = val
             return max(values)
 
 
@@ -108,7 +108,7 @@ class MinimaxPlayerG3:
                 return self.eval_board(board)
 
             if len(move_list) == 0:  # end of tree or invalid move
-                return self.minimax(board, max_depth, current_depth + 1, True, seen_boards, ab_val)
+                return self.minimax(board, max_depth, current_depth + 1, True, ab_val)
 
             if self.beam_search_enabled:
                 beam_search_moves=self.beam_search(board,2,move_list,board.get_opponent_symbol(self.symbol))
@@ -123,11 +123,11 @@ class MinimaxPlayerG3:
                 board2 = copy.deepcopy(board)
                 board2.make_move(board2.get_opponent_symbol(self.symbol), move_list[i])
 
-                if self.transposition_table and self.in_transposition_table(board2, seen_boards):
+                if self.transposition_table and self.in_transposition_table(board2)  is not None:
                     # already seen board state
-                    val = seen_boards[board2]
+                    val = self.seen_boards[tuple(map(tuple, board2._board))]
                 else:
-                    val = self.minimax(board2, max_depth, current_depth + 1, True, seen_boards, ab_val)
+                    val = self.minimax(board2, max_depth, current_depth + 1, True,ab_val)
                 # AB pruning
                 # if one of our children is less than our parent's AB, then we'll pick it or worse,
                 # and our parent node doesn't care about us
@@ -138,7 +138,7 @@ class MinimaxPlayerG3:
                 ab_val = min(ab_val, val)
                 values[i] = val
                 if self.transposition_table:
-                    seen_boards[board] = val
+                    self.seen_boards[tuple(map(tuple, board._board))] = val
 
             return min(values)
 
@@ -170,30 +170,29 @@ class MinimaxPlayerG3:
         new_board = []
         row = []
         for i in range(len(board._board)):
+            row = []
             for j in range(len(board._board)):
                 row.insert(0, board._board[j][i])
-        new_board.append(row)
+            new_board.append(row)
 
         board._board = new_board
 
-    def in_transposition_table(self, board, seen_boards):
+    def in_transposition_table(self, board):
         #rotate and check all 4 possible perspectives
         #return true if it was already in the transposition table
         #false if it is new
 
-        if board in seen_boards: #actual state
-            print("WOWOWOWOW")
-            return True
+        if tuple(map(tuple, board._board)) in self.seen_boards: #actual state
+            return self.seen_boards.get(tuple(map(tuple, board._board)))
 
         board2 = copy.deepcopy(board)
         for i in range(3): #equivilant states
             self.rotate(board2)
             #will currently check board from one perspective, rotate implementation next
-            if board2 in seen_boards:
-                print("WLWWOWOWOWL")
-                return True
+            if tuple(map(tuple, board2._board)) in self.seen_boards:
+                return self.seen_boards.get(tuple(map(tuple, board._board)))
 
-        return False
+        return None
 
 def get_default_player(symbol):
     """
