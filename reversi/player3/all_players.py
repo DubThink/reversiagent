@@ -69,7 +69,7 @@ class MinimaxPlayerG3:
                 return self.minimax(board, max_depth, current_depth + 1, False, ab_val)
 
             if self.beam_search_enabled:
-                beam_search_moves=self.beam_search(board,5,move_list,self.symbol)
+                beam_search_moves=self.beam_search(board,1,move_list,self.symbol)
             elif self.move_ordering_enabled:
                 beam_search_moves=self.beam_search(board,len(move_list),move_list,self.symbol)
             else:
@@ -142,14 +142,18 @@ class MinimaxPlayerG3:
 
             return min(values)
 
-
+    
     def beam_search(self,board,n,possible_moves,symbol):
-        if n>len(possible_moves):
-            return possible_moves
-        else:
+        # if n>len(possible_moves):
+        #     return possible_moves
+        # else:
             moves_values_queue = []
             for move in possible_moves:
                 value=len(board.is_valid_move(symbol, move))
+                if move[0] is 0 or move[0] is board.get_size() - 1:
+                    value *= 1.4
+                if move[1] is 0 or move[1] is board.get_size() - 1:
+                    value *= 1.4
                 heapq.heappush(moves_values_queue, (value, move))
             best_moves = heapq.nlargest(n, moves_values_queue)
             best_moves_list = []
@@ -242,4 +246,4 @@ def get_combined_player(symbol):
     """
     :returns: the best combination of the minimax enhancements that your team can create
     """
-    return MinimaxPlayerG3(symbol,beam_search_enabled=True,transposition_table=False,move_ordering_enabled=True,max_depth=6)
+    return MinimaxPlayerG3(symbol,ab_pruning=True,beam_search_enabled=True,transposition_table=False,move_ordering_enabled=True,max_depth=12)
